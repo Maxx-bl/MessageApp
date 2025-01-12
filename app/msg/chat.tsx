@@ -1,24 +1,31 @@
 import React, { useState, useLayoutEffect, useCallback } from "react";
-import { ImageBackground, View } from "react-native";
 import { GiftedChat, IMessage } from "react-native-gifted-chat";
 import {
   collection,
   addDoc,
   orderBy,
   query,
+  where,
   onSnapshot,
 } from "firebase/firestore";
 import { auth, db } from "../../config/firebase";
 import colors from "../../config/colors";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function Chat() {
+export default function Chat({ route }: { route: any }) {
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const insets = useSafeAreaInsets();
+  const { recipientId } = route.params;
+
+  const conversationId = [auth?.currentUser?.email, recipientId]
+    .sort()
+    .join("_");
 
   useLayoutEffect(() => {
     const collectionRef = collection(db, "chats");
-    const q = query(collectionRef, orderBy("createdAt", "desc"));
+    const q = query(
+      collectionRef,
+      where("conversationId", "==", conversationId),
+      orderBy("createdAt", "desc")
+    );
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       setMessages(
@@ -35,21 +42,27 @@ export default function Chat() {
     });
 
     return unsubscribe;
-  }, []);
+  }, [conversationId]);
 
-  // Handle sending new messages
-  const onSend = useCallback((messages: IMessage[] = []) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, messages)
-    );
-    const { _id, createdAt, text, user } = messages[0];
-    addDoc(collection(db, "chats"), {
-      _id,
-      createdAt,
-      text,
-      user,
-    });
-  }, []);
+  const onSend = useCallback(
+    (messages: IMessage[] = []) => {
+      setMessages((previousMessages) =>
+        GiftedChat.append(previousMessages, messages)
+      );
+
+      const { _id, createdAt, text, user } = messages[0];
+
+      addDoc(collection(db, "chats"), {
+        _id,
+        createdAt,
+        text,
+        user,
+        participants: [auth?.currentUser?.email, recipientId],
+        conversationId,
+      });
+    },
+    [conversationId, recipientId]
+  );
 
   return (
     <GiftedChat

@@ -42,7 +42,7 @@ export default function Contacts({ navigation }: { navigation: any }) {
                 style={styles.item}
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  navigation.navigate("Chat", { item });
+                  navigation.navigate("Chat", { recipientId: item.id });
                 }}
               >
                 <Image source={{ uri: item.img }} style={styles.pfp} />
