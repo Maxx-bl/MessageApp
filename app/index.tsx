@@ -1,25 +1,42 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
 import { View, TouchableOpacity, Text, Image, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { FontAwesome } from '@expo/vector-icons';
-import colors from '../config/colors';
 import { Entypo } from '@expo/vector-icons';
-import { createStackNavigator } from '@react-navigation/stack';
 import { RootStackParamList } from './types';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { AntDesign } from '@expo/vector-icons';
+import colors from '../config/colors';
+import { signOut } from 'firebase/auth';
+import { auth } from '../config/firebase';
 
-type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
-
-const Stack = createStackNavigator<RootStackParamList>();
+type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
 const Home: React.FC = () => {
 
-    const navigation = useNavigation<HomeScreenNavigationProp>();
+    const navigation = useNavigation<ScreenNavigationProp>();
+
+      const onSignOut = () => {
+        signOut(auth).catch(error => console.log('Error logging out: ', error));
+      };
+    
+      useLayoutEffect(() => {
+        navigation.setOptions({
+          headerRight: () => (
+            <TouchableOpacity
+              style={{ marginRight: 10 }}
+              onPress={onSignOut}
+            >
+              <AntDesign name="logout" size={24} color={colors.gray} style={{ marginRight: 10 }} />
+              </TouchableOpacity>
+          ),
+        });
+      }, [navigation]);
 
     useEffect(() => {
         navigation.setOptions({
             headerLeft: () => (
-                <FontAwesome name="search" size={24} color={colors.gray} style={{marginLeft: 15}}/>
+                <FontAwesome name="home" size={24} color={colors.gray} style={{marginLeft: 15}}/>
             )
         });
     }, [navigation]);
@@ -27,8 +44,8 @@ const Home: React.FC = () => {
     return (
         <View style={styles.container}>
             <TouchableOpacity
-                onPress={() => navigation.navigate('Chat')}
-                style={styles.chatButton}
+                onPress={() => navigation.navigate('Contacts')}
+                style={styles.contactButton}
             >
                 <Entypo name="chat" size={24} color={colors.lightGray} />
             </TouchableOpacity>
@@ -41,9 +58,9 @@ const Home: React.FC = () => {
             flex: 1,
             justifyContent: 'flex-end',
             alignItems: 'flex-end',
-            backgroundColor: "#fff",
+            backgroundColor: colors.background,
         },
-        chatButton: {
+        contactButton: {
             backgroundColor: colors.primary,
             height: 50,
             width: 50,

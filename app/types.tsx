@@ -1,10 +1,9 @@
-import { NavigatorScreenParams } from '@react-navigation/native';
-
 export type RootStackParamList = {
-  Home: undefined; // No params expected for Home
-  Chat: undefined; // No params expected for Chat
-  Login: undefined; // Example: Login route
-  Signup: undefined; // Example: Signup route
+  Home: undefined;
+  Chat: undefined;
+  Login: undefined;
+  Signup: undefined;
+  Contacts: undefined;
 };
 
 export default RootStackParamList;
