@@ -12,18 +12,45 @@ import {
   Image,
 } from "react-native";
 import colors from "../../config/colors";
-import { Entypo, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { ScrollView } from "react-native";
 import { useState } from "react";
-import { Stack } from "expo-router";
-import { format } from "date-fns";
 import Animated from "react-native-reanimated";
 
-import contacts from "../../temp_data.json";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { auth, db } from "@/config/firebase";
 
 export default function Contacts({ navigation }: { navigation: any }) {
-  const [items, setItems] = useState(contacts);
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    // Fetch all users except the logged-in user
+    const fetchContacts = async () => {
+      setLoading(true);
+      try {
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, where("uid", "!=", auth.currentUser?.uid));
+        const querySnapshot = await getDocs(q);
+
+        const users = querySnapshot.docs.map((doc) => ({
+          uid: doc.id,
+          ...doc.data(),
+        }));
+
+        setContacts(users);
+      } catch (error) {
+        console.error("Error fetching contacts:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContacts();
+  }, []);
+
+  if (loading) {
+    return <Text>Loading contacts...</Text>;
+  }
   return (
     <View style={styles.container}>
       <ScrollView
@@ -33,17 +60,29 @@ export default function Contacts({ navigation }: { navigation: any }) {
         <Animated.View style={[styles.block]}>
           <Animated.FlatList
             skipEnteringExitingAnimations
-            data={items}
+            data={contacts}
             scrollEnabled={false}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item) => item.uid.toString()}
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.item}
                 onPress={() => {
-                  navigation.navigate("Chat", { recipientId: item.id });
+                  navigation.navigate("Chat", {
+                    recipientId: item.uid,
+                    recipientEmail: item.email,
+                    recipientName: item.username,
+                    recipientAvatar: item.avatar,
+                  });
                 }}
               >
-                <Image source={{ uri: item.img }} style={styles.pfp} />
+                <Image
+                  source={
+                    item.avatar
+                      ? { uri: item.avatar }
+                      : require("../../assets/images/default-profile-picture.jpg")
+                  }
+                  style={styles.pfp}
+                />
                 <View
                   style={{
                     flexDirection: "row",
@@ -55,23 +94,9 @@ export default function Contacts({ navigation }: { navigation: any }) {
                 >
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: 16, fontWeight: "bold" }}>
-                      {item.from}
-                    </Text>
-                    <Text style={{ fontSize: 16, color: colors.gray }}>
-                      {item.msg.length > 35
-                        ? `${item.msg.substring(0, 35)}...`
-                        : item.msg}
+                      {item.username}
                     </Text>
                   </View>
-                  <Text
-                    style={{
-                      color: colors.gray,
-                      paddingRight: 50,
-                      alignSelf: "flex-start",
-                    }}
-                  >
-                    {format(item.date, "dd/MM/yyyy - hh:mm")}
-                  </Text>
                 </View>
               </TouchableOpacity>
             )}

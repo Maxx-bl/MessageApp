@@ -7,7 +7,6 @@ import { onAuthStateChanged, User } from "firebase/auth";
 import { RootStackParamList } from "./types";
 import { auth } from "@/config/firebase";
 import colors from "@/config/colors";
-import { Entypo } from "@expo/vector-icons";
 
 import Chat from "./msg/chat";
 import Login from "./auths/login";
@@ -41,7 +40,13 @@ function ChatStack() {
       screenOptions={{ headerShown: true }}
       initialRouteName="Home"
     >
-      <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen
+        name="Home"
+        component={Home}
+        options={{
+          title: `${auth.currentUser?.displayName}`,
+        }}
+      />
       <Stack.Screen
         name="Contacts"
         component={Contacts}
@@ -52,31 +57,7 @@ function ChatStack() {
           headerSearchBarOptions: { placeholder: "Search" },
         }}
       />
-      <Stack.Screen
-        name="Chat"
-        component={Chat}
-        options={{
-          title: "",
-          headerTitle: () => (
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 10,
-                paddingBottom: 4,
-              }}
-            >
-              <Image
-                source={{
-                  uri: "https://i.pravatar.cc/150?u=ceciliaduke@marketoid.com",
-                }}
-                style={{ width: 40, height: 40, borderRadius: 50 }}
-              />
-              <Text style={{ fontSize: 16, fontWeight: "bold" }}>Simon</Text>
-            </View>
-          ),
-        }}
-      />
+      <Stack.Screen name="Chat" component={Chat} />
     </Stack.Navigator>
   );
 }

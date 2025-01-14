@@ -10,14 +10,40 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../../config/firebase";
 import colors from "../../config/colors";
+import { View, Image, Text } from "react-native";
 
-export default function Chat({ route }: { route: any }) {
+export default function Chat({
+  route,
+  navigation,
+}: {
+  route: any;
+  navigation: any;
+}) {
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const { recipientId } = route.params;
+  const { recipientId, recipientEmail, recipientName, recipientAvatar } =
+    route.params;
 
-  const conversationId = [auth?.currentUser?.email, recipientId]
-    .sort()
-    .join("_");
+  const conversationId = [auth?.currentUser?.uid, recipientId].sort().join("_");
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => (
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          <Image
+            source={
+              recipientAvatar
+                ? { uri: recipientAvatar }
+                : require("../../assets/images/default-profile-picture.jpg")
+            }
+            style={{ width: 40, height: 40, borderRadius: 20 }}
+          />
+          <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+            {recipientName}
+          </Text>
+        </View>
+      ),
+    });
+  }, [navigation, recipientName, recipientAvatar]);
 
   useLayoutEffect(() => {
     const collectionRef = collection(db, "chats");
@@ -57,7 +83,7 @@ export default function Chat({ route }: { route: any }) {
         createdAt,
         text,
         user,
-        participants: [auth?.currentUser?.email, recipientId],
+        participants: [auth?.currentUser?.uid, recipientId],
         conversationId,
       });
     },
@@ -75,7 +101,10 @@ export default function Chat({ route }: { route: any }) {
       }}
       user={{
         _id: auth?.currentUser?.email || "",
-        avatar: "https://i.pravatar.cc/300",
+        avatar:
+          recipientAvatar != null
+            ? recipientAvatar
+            : `https://dummyimage.com/300.png/09f/fff&text=${auth?.currentUser?.displayName}`,
       }}
     />
   );
