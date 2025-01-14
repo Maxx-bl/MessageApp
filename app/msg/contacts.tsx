@@ -18,7 +18,6 @@ import { useState } from "react";
 import { Stack } from "expo-router";
 import { format } from "date-fns";
 import Animated from "react-native-reanimated";
-import * as Haptics from "expo-haptics";
 
 import contacts from "../../temp_data.json";
 
@@ -41,7 +40,6 @@ export default function Contacts({ navigation }: { navigation: any }) {
               <TouchableOpacity
                 style={styles.item}
                 onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   navigation.navigate("Chat", { recipientId: item.id });
                 }}
               >
