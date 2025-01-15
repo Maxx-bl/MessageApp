@@ -1,6 +1,4 @@
 import React, { useState, createContext, useContext, useEffect } from "react";
-import { TouchableOpacity, Image, Text } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { View, ActivityIndicator } from "react-native";
 import { onAuthStateChanged, User } from "firebase/auth";
@@ -40,13 +38,7 @@ function ChatStack() {
       screenOptions={{ headerShown: true }}
       initialRouteName="Home"
     >
-      <Stack.Screen
-        name="Home"
-        component={Home}
-        options={{
-          title: `${auth.currentUser?.displayName}`,
-        }}
-      />
+      <Stack.Screen name="Home" component={Home} />
       <Stack.Screen
         name="Contacts"
         component={Contacts}
@@ -54,7 +46,6 @@ function ChatStack() {
           title: "Contacts",
           headerShadowVisible: false,
           headerStyle: { backgroundColor: colors.background },
-          headerSearchBarOptions: { placeholder: "Search" },
         }}
       />
       <Stack.Screen name="Chat" component={Chat} />

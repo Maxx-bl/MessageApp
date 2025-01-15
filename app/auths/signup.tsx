@@ -9,7 +9,11 @@ import {
   StatusBar,
   Alert,
 } from "react-native";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  reload,
+  updateProfile,
+} from "firebase/auth";
 import {
   collection,
   query,
@@ -22,26 +26,29 @@ import {
 import { auth, db } from "../../config/firebase";
 import Feather from "@expo/vector-icons/Feather";
 import colors from "../../config/colors";
+import moment from "moment";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function Signup({ navigation }: { navigation: any }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [username, setUsername] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
+
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
 
   const onHandleSignup = async () => {
-    if (email !== "" && password !== "" && username !== "") {
-      const MIN_LENGTH = 3;
-      if (username.length < MIN_LENGTH) {
-        setErrorMsg(`Username must be at least ${MIN_LENGTH} characters long!`);
-        setTimeout(() => {
-          setErrorMsg("");
-        }, 3000);
-        return;
-      }
+    if (email !== "" && password !== "" && username !== "" && dateOfBirth) {
       if (password !== passwordConfirm) {
         setErrorMsg("Passwords do not match!");
         setTimeout(() => {
@@ -49,8 +56,51 @@ export default function Signup({ navigation }: { navigation: any }) {
         }, 3000);
         return;
       }
+
+      const MinLength = 3;
+      const MaxLength = 25;
+      if (username.length < MinLength) {
+        setErrorMsg(`Username must be at least ${MinLength} characters long!`);
+        setTimeout(() => {
+          setErrorMsg("");
+        }, 3000);
+        return;
+      }
+      if (username.length > MaxLength) {
+        setErrorMsg(`Username must be less than ${MaxLength} characters long!`);
+        setTimeout(() => {
+          setErrorMsg("");
+        }, 3000);
+        return;
+      }
+
+      if (!moment().subtract(18, "years").isAfter(dateOfBirth)) {
+        setErrorMsg("You must be at least 18 years old to sign up.");
+        setTimeout(() => setErrorMsg(""), 3000);
+        return;
+      }
+
+      const AuthorizedCharacters = "abcdefghijklmnopqrstuvwxyz1234567890_-.";
+      let check = true;
+      let i = 0;
+      while (check && i < username.length) {
+        if (AuthorizedCharacters.indexOf(username[i].toLowerCase()) < 0)
+          check = false;
+        i++;
+      }
+      if (!check) {
+        setErrorMsg("You can only use letters, numbers or . - _");
+        setTimeout(() => {
+          setErrorMsg("");
+        }, 5000);
+        return;
+      }
+
       const userReference = collection(db, "users");
-      const q = query(userReference, where("username", "==", username));
+      const q = query(
+        userReference,
+        where("username", "==", username.toLowerCase())
+      );
       const snapshot = await getDocs(q);
       if (!snapshot.empty) {
         setErrorMsg("Username already taken!");
@@ -59,18 +109,15 @@ export default function Signup({ navigation }: { navigation: any }) {
         }, 3000);
       } else {
         setErrorMsg("");
-        setSuccessMsg("Signup successful!");
-        setTimeout(() => {
-          setSuccessMsg("");
-        }, 3000);
         createUserWithEmailAndPassword(auth, email, password)
           .then(async ({ user }) => {
-            await updateProfile(user, { displayName: username });
+            await updateProfile(user, { displayName: username.toLowerCase() });
+            await reload(user);
             const userReference = collection(db, "users");
             await setDoc(doc(userReference, user.uid), {
               uid: user.uid,
               email: user.email,
-              username: username,
+              username: username.toLowerCase(),
               avatar: null,
               createdAt: serverTimestamp(),
             });
@@ -87,18 +134,17 @@ export default function Signup({ navigation }: { navigation: any }) {
         <Text style={styles.title}>Sign Up</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter email"
+          placeholder="Email"
           autoCapitalize="none"
           keyboardType="email-address"
           textContentType="emailAddress"
-          autoFocus={true}
           value={email}
           onChangeText={(text) => setEmail(text)}
         />
         <View style={styles.passwordContainer}>
           <TextInput
             style={styles.passwordInput}
-            placeholder="Enter password"
+            placeholder="Password"
             autoCapitalize="none"
             autoCorrect={false}
             secureTextEntry={!showPassword}
@@ -139,18 +185,39 @@ export default function Signup({ navigation }: { navigation: any }) {
           value={passwordConfirm}
           onChangeText={(text) => setPasswordConfirm(text)}
         />
+        <TouchableOpacity
+          style={styles.datePickerContainer}
+          onPress={() => showDatePicker()}
+        >
+          <Text style={styles.datePickerText}>
+            {dateOfBirth
+              ? moment(dateOfBirth).format("DD MMMM YYYY")
+              : "Date of Birth"}
+          </Text>
+        </TouchableOpacity>
+        {isDatePickerVisible && (
+          <DateTimePicker
+            value={dateOfBirth || new Date(2000, 0, 1)}
+            mode="date"
+            display="calendar"
+            onChange={(event, selectedDate) => {
+              if (event.type === "set") {
+                setDateOfBirth(selectedDate || dateOfBirth);
+              }
+              hideDatePicker();
+            }}
+            maximumDate={new Date()}
+          />
+        )}
         <TextInput
           style={styles.input}
-          placeholder="Enter username"
+          placeholder="Username"
           autoCapitalize="none"
-          keyboardType="default"
           textContentType="username"
-          autoFocus={true}
           value={username}
           onChangeText={(text) => setUsername(text)}
         />
         {errorMsg ? <Text style={styles.error}>{errorMsg}</Text> : null}
-        {successMsg ? <Text style={styles.success}>{successMsg}</Text> : null}
         <TouchableOpacity style={styles.button} onPress={onHandleSignup}>
           <Text
             style={{
@@ -254,10 +321,16 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     alignSelf: "center",
   },
-  success: {
-    color: "green",
+  datePickerContainer: {
+    backgroundColor: colors.mediumGray,
+    height: 58,
+    marginBottom: 20,
+    justifyContent: "center",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+  },
+  datePickerText: {
     fontSize: 16,
-    marginBottom: 10,
-    alignSelf: "center",
+    color: "#999999",
   },
 });

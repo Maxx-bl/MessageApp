@@ -11,6 +11,8 @@ import {
 import { auth, db } from "../../config/firebase";
 import colors from "../../config/colors";
 import { View, Image, Text } from "react-native";
+const CryptoJS = require("crypto-js");
+import Config from "../../settings.json";
 
 export default function Chat({
   route,
@@ -24,6 +26,17 @@ export default function Chat({
     route.params;
 
   const conversationId = [auth?.currentUser?.uid, recipientId].sort().join("_");
+
+  const ENCRYPTION_KEY = Config.ENCRYPTION_KEY;
+
+  const encryptMessage = (message: any) => {
+    return CryptoJS.AES.encrypt(message, ENCRYPTION_KEY).toString();
+  };
+
+  const decryptMessage = (encryptedMessage: any) => {
+    const bytes = CryptoJS.AES.decrypt(encryptedMessage, ENCRYPTION_KEY);
+    return bytes.toString(CryptoJS.enc.Utf8);
+  };
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -57,10 +70,11 @@ export default function Chat({
       setMessages(
         querySnapshot.docs.map((doc) => {
           const data = doc.data();
+          const decryptedText = decryptMessage(data.text);
           return {
             _id: data._id,
             createdAt: data.createdAt.toDate(),
-            text: data.text,
+            text: decryptedText,
             user: data.user,
           } as IMessage;
         })
@@ -77,11 +91,12 @@ export default function Chat({
       );
 
       const { _id, createdAt, text, user } = messages[0];
+      const encryptedText = encryptMessage(text);
 
       addDoc(collection(db, "chats"), {
         _id,
         createdAt,
-        text,
+        text: encryptedText,
         user,
         participants: [auth?.currentUser?.uid, recipientId],
         conversationId,

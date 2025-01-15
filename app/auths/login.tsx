@@ -1,23 +1,29 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, StatusBar, Alert } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  SafeAreaView,
+  StatusBar,
+  Alert,
+} from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../config/firebase";
-import Feather from '@expo/vector-icons/Feather';
+import Feather from "@expo/vector-icons/Feather";
 import colors from "../../config/colors";
 
 export default function Login({ navigation }: { navigation: any }) {
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const onHandleLogin = () => {
     if (email !== "" && password !== "") {
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          console.log("Login success");
-        })
-        .catch((err) => Alert.alert("Login error", err.message));
+      signInWithEmailAndPassword(auth, email, password).catch((err) =>
+        Alert.alert("Login error", err.message)
+      );
     }
   };
 
@@ -28,7 +34,7 @@ export default function Login({ navigation }: { navigation: any }) {
         <Text style={styles.title}>Log In</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter email"
+          placeholder="Email"
           autoCapitalize="none"
           keyboardType="email-address"
           textContentType="emailAddress"
@@ -39,7 +45,7 @@ export default function Login({ navigation }: { navigation: any }) {
         <View style={styles.passwordContainer}>
           <TextInput
             style={styles.passwordInput}
-            placeholder="Enter password"
+            placeholder="Password"
             autoCapitalize="none"
             autoCorrect={false}
             secureTextEntry={!showPassword}
@@ -52,12 +58,32 @@ export default function Login({ navigation }: { navigation: any }) {
             onPress={() => setShowPassword(!showPassword)}
           >
             <Text style={styles.toggleButtonText}>
-              {showPassword ? <Feather name="eye-off" size={24} color={colors.gray} style={{ marginRight: 10 }} /> : <Feather name="eye" size={24} color={colors.gray} style={{ marginRight: 10 }} />}
+              {showPassword ? (
+                <Feather
+                  name="eye-off"
+                  size={24}
+                  color={colors.gray}
+                  style={{ marginRight: 10 }}
+                />
+              ) : (
+                <Feather
+                  name="eye"
+                  size={24}
+                  color={colors.gray}
+                  style={{ marginRight: 10 }}
+                />
+              )}
             </Text>
           </TouchableOpacity>
         </View>
         <TouchableOpacity style={styles.button} onPress={onHandleLogin}>
-          <Text style={{ fontWeight: "bold", color: colors.background, fontSize: 18 }}>
+          <Text
+            style={{
+              fontWeight: "bold",
+              color: colors.background,
+              fontSize: 18,
+            }}
+          >
             Go!
           </Text>
         </TouchableOpacity>
@@ -73,7 +99,9 @@ export default function Login({ navigation }: { navigation: any }) {
             Don't have an account?{" "}
           </Text>
           <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-            <Text style={{ color: colors.primary, fontWeight: "600", fontSize: 14 }}>
+            <Text
+              style={{ color: colors.primary, fontWeight: "600", fontSize: 14 }}
+            >
               Sign Up
             </Text>
           </TouchableOpacity>

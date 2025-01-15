@@ -1,28 +1,35 @@
-import React, { useEffect, useLayoutEffect } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { View, TouchableOpacity, Text, Image, StyleSheet } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { FontAwesome } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
-import { RootStackParamList } from "./types";
-import { StackNavigationProp } from "@react-navigation/stack";
 import { AntDesign } from "@expo/vector-icons";
 import colors from "../config/colors";
 import { signOut } from "firebase/auth";
 import { auth } from "../config/firebase";
 
-type ScreenNavigationProp = StackNavigationProp<RootStackParamList, "Home">;
+export default function Home({ navigation }: { navigation: any }) {
+  const [userDisplayName, setUserDisplayName] = useState(
+    auth.currentUser?.displayName
+  );
 
-const Home: React.FC = () => {
   const user = auth.currentUser;
-
-  const navigation = useNavigation<ScreenNavigationProp>();
 
   const onSignOut = () => {
     signOut(auth).catch((error) => console.log("Error logging out: ", error));
   };
 
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setUserDisplayName(user.displayName);
+      }
+    });
+    return unsubscribe;
+  }, []);
+
   useLayoutEffect(() => {
     navigation.setOptions({
+      headerTitle: `${userDisplayName || "Welcome!"}`,
       headerRight: () => (
         <TouchableOpacity style={{ marginRight: 10 }} onPress={onSignOut}>
           {user?.photoURL ? (
@@ -71,7 +78,7 @@ const Home: React.FC = () => {
       </TouchableOpacity>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -98,5 +105,3 @@ const styles = StyleSheet.create({
     marginBottom: 50,
   },
 });
-
-export default Home;

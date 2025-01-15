@@ -5,5 +5,3 @@ export type RootStackParamList = {
   Signup: undefined;
   Contacts: undefined;
 };
-
-export default RootStackParamList;
