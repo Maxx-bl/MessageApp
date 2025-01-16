@@ -1,4 +1,9 @@
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 import {
   StyleSheet,
   Text,
@@ -7,11 +12,12 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import colors from "../../config/colors";
 import { ScrollView } from "react-native";
 import Animated from "react-native-reanimated";
-import { FontAwesome } from "@expo/vector-icons";
+import { Entypo, FontAwesome } from "@expo/vector-icons";
 import {
   collection,
   getDocs,
@@ -101,7 +107,18 @@ export default function Contacts({ navigation }: { navigation: any }) {
           contact.lastMsgDate = lastMessage.createdAt;
         }
 
-        setContacts(contactList);
+        const sortedContacts = contactList.sort((a, b) => {
+          if (a.lastMsgDate && b.lastMsgDate) {
+            return b.lastMsgDate - a.lastMsgDate;
+          } else if (a.lastMsgDate) {
+            return -1;
+          } else if (b.lastMsgDate) {
+            return 1;
+          }
+          return 0;
+        });
+
+        setContacts(sortedContacts);
       } else {
         setContacts([]);
       }
@@ -172,11 +189,22 @@ export default function Contacts({ navigation }: { navigation: any }) {
           onSubmitEditing={handleSearchSubmit}
           returnKeyType="search"
         />
+        <TouchableOpacity onPress={() => setSearchQuery("")}>
+          <Entypo
+            name="cross"
+            size={26}
+            color={colors.gray}
+            style={styles.searchIcon}
+          />
+        </TouchableOpacity>
       </View>
 
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{ paddingBottom: 40 }}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={fetchContacts} />
+        }
       >
         <Animated.View style={[styles.block]}>
           {filteredContacts.length > 0 ? (
@@ -246,7 +274,11 @@ export default function Contacts({ navigation }: { navigation: any }) {
                             })()}
                           </Text>
 
-                          <Text style={{ fontSize: 14 }}>{item.lastMsg}</Text>
+                          <Text style={{ fontSize: 14 }}>
+                            {item.lastMsg.length < 30
+                              ? item.lastMsg
+                              : `${item.lastMsg.substring(0, 30)}...`}
+                          </Text>
                         </View>
                       ) : (
                         <></>
@@ -256,12 +288,14 @@ export default function Contacts({ navigation }: { navigation: any }) {
                 </TouchableOpacity>
               )}
             />
-          ) : (
+          ) : searchQuery == null ? (
             <View style={styles.loadingContainer}>
               <Animated.Text style={styles.loadingText}>
                 You have no contact yet.
               </Animated.Text>
             </View>
+          ) : (
+            <></>
           )}
         </Animated.View>
       </ScrollView>

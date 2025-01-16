@@ -11,6 +11,9 @@ import Login from "./auths/login";
 import Signup from "./auths/signup";
 import Home from "./index";
 import Contacts from "./msg/contacts";
+import Settings from "./params/settings";
+import UpdateAvatar from "./params/updateAvatar";
+import UpdateUsername from "./params/updateUsername";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -38,12 +41,26 @@ function ChatStack() {
       screenOptions={{ headerShown: true }}
       initialRouteName="Home"
     >
-      <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen
+        name="Home"
+        component={Home}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen name="Settings" component={Settings}></Stack.Screen>
+      <Stack.Screen
+        name="UpdateAvatar"
+        component={UpdateAvatar}
+        options={{ title: "Avatar" }}
+      ></Stack.Screen>
+      <Stack.Screen
+        name="UpdateUsername"
+        component={UpdateUsername}
+        options={{ title: "Avatar" }}
+      ></Stack.Screen>
       <Stack.Screen
         name="Contacts"
         component={Contacts}
         options={{
-          title: "Contacts",
           headerShadowVisible: false,
           headerStyle: { backgroundColor: colors.background },
         }}

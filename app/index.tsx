@@ -5,18 +5,13 @@ import { Entypo } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import colors from "../config/colors";
 import { signOut } from "firebase/auth";
-import { auth } from "../config/firebase";
+import { auth, db } from "../config/firebase";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 export default function Home({ navigation }: { navigation: any }) {
   const [userDisplayName, setUserDisplayName] = useState(
     auth.currentUser?.displayName
   );
-
-  const user = auth.currentUser;
-
-  const onSignOut = () => {
-    signOut(auth).catch((error) => console.log("Error logging out: ", error));
-  };
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -27,55 +22,40 @@ export default function Home({ navigation }: { navigation: any }) {
     return unsubscribe;
   }, []);
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerTitle: `${userDisplayName || "Welcome!"}`,
-      headerRight: () => (
-        <TouchableOpacity style={{ marginRight: 10 }} onPress={onSignOut}>
-          {user?.photoURL ? (
-            <View>
-              <Image source={{ uri: user.photoURL }} />
-              <AntDesign
-                name="logout"
-                size={24}
-                color={colors.gray}
-                style={{ marginRight: 10 }}
-              />
-            </View>
-          ) : (
-            <AntDesign
-              name="logout"
-              size={24}
-              color={colors.gray}
-              style={{ marginRight: 10 }}
-            />
-          )}
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation]);
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => (
-        <FontAwesome
-          name="home"
-          size={24}
-          color={colors.gray}
-          style={{ marginLeft: 15 }}
-        />
-      ),
-    });
-  }, [navigation]);
-
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        onPress={() => navigation.navigate("Contacts")}
-        style={styles.contactButton}
-      >
-        <Entypo name="chat" size={24} color={colors.lightGray} />
-      </TouchableOpacity>
+      <View style={styles.header}>
+        <Image
+          source={
+            auth.currentUser?.photoURL
+              ? { uri: auth.currentUser.photoURL }
+              : require("../assets/images/default-profile-picture.jpg")
+          }
+          style={{ width: 60, height: 60, borderRadius: 30 }}
+        />
+        <Text style={{ fontSize: 20, fontWeight: "bold", marginLeft: -20 }}>
+          {userDisplayName ? `@${userDisplayName}` : "Welcome!"}
+        </Text>
+        <TouchableOpacity
+          style={{ marginRight: 10 }}
+          onPress={() => navigation.navigate("Settings")}
+        >
+          <AntDesign
+            name="setting"
+            size={24}
+            color={colors.gray}
+            style={{ marginRight: 10 }}
+          />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.floatingButton}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Contacts")}
+          style={styles.contactButton}
+        >
+          <Entypo name="chat" size={24} color={colors.lightGray} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -83,15 +63,21 @@ export default function Home({ navigation }: { navigation: any }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "flex-end",
-    alignItems: "flex-end",
     backgroundColor: colors.background,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: colors.background,
+    elevation: 5,
   },
   contactButton: {
     backgroundColor: colors.primary,
-    height: 50,
-    width: 50,
-    borderRadius: 25,
+    height: 60,
+    width: 60,
+    borderRadius: 30,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: colors.primary,
@@ -103,5 +89,10 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     marginRight: 20,
     marginBottom: 50,
+  },
+  floatingButton: {
+    flex: 1,
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
   },
 });

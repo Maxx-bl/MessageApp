@@ -111,14 +111,17 @@ export default function Signup({ navigation }: { navigation: any }) {
         setErrorMsg("");
         createUserWithEmailAndPassword(auth, email, password)
           .then(async ({ user }) => {
-            await updateProfile(user, { displayName: username.toLowerCase() });
+            await updateProfile(user, {
+              displayName: username.toLowerCase(),
+              photoURL: `https://avatar.iran.liara.run/username?username=${username.toLowerCase()}`,
+            });
             await reload(user);
             const userReference = collection(db, "users");
             await setDoc(doc(userReference, user.uid), {
               uid: user.uid,
               email: user.email,
               username: username.toLowerCase(),
-              avatar: null,
+              avatar: `https://avatar.iran.liara.run/username?username=${username.toLowerCase()}`,
               createdAt: serverTimestamp(),
             });
           })

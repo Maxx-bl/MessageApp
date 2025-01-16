@@ -10,9 +10,10 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../../config/firebase";
 import colors from "../../config/colors";
-import { View, Image, Text } from "react-native";
+import { View, Image, Text, TouchableOpacity } from "react-native";
 const CryptoJS = require("crypto-js");
 import Config from "../../settings.json";
+import { AntDesign } from "@expo/vector-icons";
 
 export default function Chat({
   route,
@@ -51,7 +52,7 @@ export default function Chat({
             style={{ width: 40, height: 40, borderRadius: 20 }}
           />
           <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-            {recipientName}
+            @{recipientName}
           </Text>
         </View>
       ),
@@ -116,10 +117,9 @@ export default function Chat({
       }}
       user={{
         _id: auth?.currentUser?.email || "",
-        avatar:
-          recipientAvatar != null
-            ? recipientAvatar
-            : `https://dummyimage.com/300.png/09f/fff&text=${auth?.currentUser?.displayName}`,
+        avatar: auth?.currentUser?.photoURL
+          ? auth?.currentUser?.photoURL
+          : `https://avatar.iran.liara.run/username?username=${auth?.currentUser?.displayName}`,
       }}
     />
   );
