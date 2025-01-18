@@ -1,5 +1,12 @@
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { View, TouchableOpacity, Text, Image, StyleSheet } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  Image,
+  StyleSheet,
+  StatusBar,
+} from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
@@ -33,7 +40,14 @@ export default function Home({ navigation }: { navigation: any }) {
           }
           style={{ width: 60, height: 60, borderRadius: 30 }}
         />
-        <Text style={{ fontSize: 20, fontWeight: "bold", marginLeft: -20 }}>
+        <Text
+          style={{
+            fontSize: 20,
+            fontWeight: "bold",
+            marginLeft: -20,
+            color: colors.textPrimary,
+          }}
+        >
           {userDisplayName ? `@${userDisplayName}` : "Welcome!"}
         </Text>
         <TouchableOpacity
@@ -56,6 +70,7 @@ export default function Home({ navigation }: { navigation: any }) {
           <Entypo name="chat" size={24} color={colors.lightGray} />
         </TouchableOpacity>
       </View>
+      <StatusBar barStyle="light-content" />
     </View>
   );
 }

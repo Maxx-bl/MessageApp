@@ -1,5 +1,10 @@
 import React, { useState, useLayoutEffect, useCallback } from "react";
-import { GiftedChat, IMessage } from "react-native-gifted-chat";
+import {
+  GiftedChat,
+  IMessage,
+  InputToolbar,
+  Send,
+} from "react-native-gifted-chat";
 import {
   collection,
   addDoc,
@@ -7,13 +12,24 @@ import {
   query,
   where,
   onSnapshot,
+  getDocs,
+  updateDoc,
+  doc,
 } from "firebase/firestore";
 import { auth, db } from "../../config/firebase";
 import colors from "../../config/colors";
-import { View, Image, Text, TouchableOpacity } from "react-native";
+import {
+  View,
+  Image,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  TextInput,
+} from "react-native";
 const CryptoJS = require("crypto-js");
 import Config from "../../settings.json";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Entypo, Feather, Ionicons } from "@expo/vector-icons";
+import { Composer } from "react-native-gifted-chat";
 
 export default function Chat({
   route,
@@ -23,6 +39,7 @@ export default function Chat({
   navigation: any;
 }) {
   const [messages, setMessages] = useState<IMessage[]>([]);
+  const [text, setText] = useState("");
   const { recipientId, recipientEmail, recipientName, recipientAvatar } =
     route.params;
 
@@ -38,6 +55,25 @@ export default function Chat({
     const bytes = CryptoJS.AES.decrypt(encryptedMessage, ENCRYPTION_KEY);
     return bytes.toString(CryptoJS.enc.Utf8);
   };
+
+  useLayoutEffect(() => {
+    const fetchUnreadMessages = async () => {
+      const chatRef = collection(db, "chats");
+      const q = query(
+        chatRef,
+        where("conversationId", "==", conversationId),
+        where("user._id", "==", recipientEmail),
+        where("isRead", "==", false)
+      );
+      const snapshot = await getDocs(q);
+
+      snapshot.forEach((document) => {
+        const docRef = doc(db, "chats", document.id);
+        updateDoc(docRef, { isRead: true });
+      });
+    };
+    fetchUnreadMessages();
+  });
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -101,17 +137,58 @@ export default function Chat({
         user,
         participants: [auth?.currentUser?.uid, recipientId],
         conversationId,
+        isRead: false,
       });
     },
     [conversationId, recipientId]
   );
+
+  const renderInputToolbar = (props: any) => {
+    return (
+      <View style={styles.inputToolbarContainer}>
+        {/* <TouchableOpacity style={styles.attachmentButton}>
+          <Feather name="paperclip" size={32} color={colors.primary} />
+        </TouchableOpacity> */}
+        <TextInput
+          style={styles.textInput}
+          placeholder="Message..."
+          placeholderTextColor="#aaa"
+          value={text}
+          multiline={true}
+          onChangeText={setText}
+        />
+        <TouchableOpacity
+          style={styles.sendButton}
+          onPress={() => {
+            if (text.trim()) {
+              onSend([
+                {
+                  _id: `${Math.random().toString()}-${Date.now()}`,
+                  text,
+                  createdAt: new Date(),
+                  user: {
+                    _id: auth?.currentUser?.email || "",
+                    avatar: auth?.currentUser?.photoURL
+                      ? auth?.currentUser?.photoURL
+                      : `https://avatar.iran.liara.run/username?username=${auth?.currentUser?.displayName}`,
+                  },
+                },
+              ]);
+              setText("");
+            }
+          }}
+        >
+          <Ionicons name="send" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   return (
     <GiftedChat
       messages={messages}
       showAvatarForEveryMessage={false}
       showUserAvatar={false}
-      onSend={(messages) => onSend(messages)}
       messagesContainerStyle={{
         backgroundColor: colors.background,
       }}
@@ -121,6 +198,35 @@ export default function Chat({
           ? auth?.currentUser?.photoURL
           : `https://avatar.iran.liara.run/username?username=${auth?.currentUser?.displayName}`,
       }}
+      renderInputToolbar={renderInputToolbar}
     />
   );
 }
+
+const styles = StyleSheet.create({
+  inputToolbarContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: colors.background,
+  },
+  attachmentButton: {
+    marginRight: 10,
+  },
+  textInput: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    fontSize: 16,
+    borderColor: colors.primary,
+    borderWidth: 2,
+  },
+  sendButton: {
+    marginLeft: 10,
+    backgroundColor: colors.primary,
+    borderRadius: 20,
+    padding: 10,
+  },
+});

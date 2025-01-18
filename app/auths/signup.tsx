@@ -252,7 +252,11 @@ export default function Signup({ navigation }: { navigation: any }) {
           </TouchableOpacity>
         </View>
       </SafeAreaView>
-      <StatusBar barStyle="light-content" />
+      <StatusBar
+        barStyle="light-content"
+        translucent
+        backgroundColor={colors.background}
+      />
     </View>
   );
 }
@@ -260,7 +264,7 @@ export default function Signup({ navigation }: { navigation: any }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: colors.background,
   },
   title: {
     fontSize: 36,
@@ -302,7 +306,7 @@ const styles = StyleSheet.create({
     height: "75%",
     position: "absolute",
     bottom: 0,
-    backgroundColor: "#fff",
+    backgroundColor: colors.background,
     borderTopLeftRadius: 60,
   },
   form: {

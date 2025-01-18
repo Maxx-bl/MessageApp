@@ -38,24 +38,36 @@ const AuthUserProvider = ({ children }: { children: any }) => {
 function ChatStack() {
   return (
     <Stack.Navigator
-      screenOptions={{ headerShown: true }}
+      screenOptions={{
+        headerShown: true,
+        headerStyle: { backgroundColor: colors.background },
+      }}
       initialRouteName="Home"
     >
       <Stack.Screen
         name="Home"
         component={Home}
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+          headerStyle: { backgroundColor: colors.background },
+        }}
       />
       <Stack.Screen name="Settings" component={Settings}></Stack.Screen>
       <Stack.Screen
         name="UpdateAvatar"
         component={UpdateAvatar}
-        options={{ title: "Avatar" }}
+        options={{
+          title: "Avatar",
+          headerStyle: { backgroundColor: colors.background },
+        }}
       ></Stack.Screen>
       <Stack.Screen
         name="UpdateUsername"
         component={UpdateUsername}
-        options={{ title: "Avatar" }}
+        options={{
+          title: "Username",
+          headerStyle: { backgroundColor: colors.background },
+        }}
       ></Stack.Screen>
       <Stack.Screen
         name="Contacts"
@@ -65,7 +77,13 @@ function ChatStack() {
           headerStyle: { backgroundColor: colors.background },
         }}
       />
-      <Stack.Screen name="Chat" component={Chat} />
+      <Stack.Screen
+        name="Chat"
+        component={Chat}
+        options={{
+          headerStyle: { backgroundColor: colors.background },
+        }}
+      />
     </Stack.Navigator>
   );
 }

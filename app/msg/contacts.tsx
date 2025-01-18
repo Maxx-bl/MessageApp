@@ -17,7 +17,7 @@ import {
 import colors from "../../config/colors";
 import { ScrollView } from "react-native";
 import Animated from "react-native-reanimated";
-import { Entypo, FontAwesome } from "@expo/vector-icons";
+import { AntDesign, Entypo, FontAwesome, Ionicons } from "@expo/vector-icons";
 import {
   collection,
   getDocs,
@@ -29,6 +29,7 @@ import {
 import { auth, db } from "@/config/firebase";
 const CryptoJS = require("crypto-js");
 import Config from "../../settings.json";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function Contacts({ navigation }: { navigation: any }) {
   const [contacts, setContacts] = useState<any[]>([]);
@@ -99,12 +100,18 @@ export default function Contacts({ navigation }: { navigation: any }) {
           ...doc.data(),
           lastMsg: "",
           lastMsgDate: null,
+          lastMsgIsRead: true,
+          currentIsSender: true,
         }));
 
         for (const contact of contactList) {
           const lastMessage = await fetchLastMessage(contact.uid);
           contact.lastMsg = decryptMessage(lastMessage.text);
           contact.lastMsgDate = lastMessage.createdAt;
+          if (lastMessage.sender !== auth.currentUser?.email) {
+            contact.currentIsSender = false;
+            contact.lastMsgIsRead = lastMessage.isRead;
+          }
         }
 
         const sortedContacts = contactList.sort((a, b) => {
@@ -129,6 +136,12 @@ export default function Contacts({ navigation }: { navigation: any }) {
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchContacts();
+    }, [])
+  );
+
   const fetchLastMessage = async (contactUid: string) => {
     try {
       const chatRef = collection(db, "chats");
@@ -143,14 +156,18 @@ export default function Contacts({ navigation }: { navigation: any }) {
         uid: doc.id,
         text: doc.data().text,
         createdAt: doc.data().createdAt,
+        isRead: doc.data().isRead,
+        sender: doc.data().user._id,
       }));
 
       messages.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
 
-      return messages[0] || { text: "", createdAt: null };
+      return (
+        messages[0] || { text: "", createdAt: null, isRead: true, sender: null }
+      );
     } catch (error) {
       console.error("Error fetching last message:", error);
-      return { text: "", createdAt: null };
+      return { text: "", createdAt: null, isRead: true, sender: null };
     }
   };
 
@@ -243,7 +260,13 @@ export default function Contacts({ navigation }: { navigation: any }) {
                     }}
                   >
                     <View style={{ flex: 1 }}>
-                      <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          fontWeight: "bold",
+                          color: colors.textPrimary,
+                        }}
+                      >
                         {item.username}
                       </Text>
                       {item.lastMsg ? (
@@ -253,7 +276,9 @@ export default function Contacts({ navigation }: { navigation: any }) {
                             gap: 10,
                           }}
                         >
-                          <Text style={{ fontSize: 14 }}>
+                          <Text
+                            style={{ fontSize: 14, color: colors.textPrimary }}
+                          >
                             {(() => {
                               const messageDate = new Date(
                                 item.lastMsgDate.seconds * 1000
@@ -273,12 +298,60 @@ export default function Contacts({ navigation }: { navigation: any }) {
                               }
                             })()}
                           </Text>
-
-                          <Text style={{ fontSize: 14 }}>
-                            {item.lastMsg.length < 30
-                              ? item.lastMsg
-                              : `${item.lastMsg.substring(0, 30)}...`}
-                          </Text>
+                          {item.lastMsgIsRead ? (
+                            <></>
+                          ) : (
+                            <FontAwesome
+                              name="circle"
+                              size={20}
+                              color="lightgreen"
+                            />
+                          )}
+                          {item.lastMsg.replace(/[\r\n]+/g, " ").length < 30 ? (
+                            item.lastMsgIsRead ? (
+                              <Text
+                                style={{
+                                  fontSize: 14,
+                                  color: colors.textPrimary,
+                                }}
+                              >
+                                {item.lastMsg.replace(/[\r\n]+/g, " ")}
+                              </Text>
+                            ) : (
+                              <Text
+                                style={{
+                                  fontSize: 14,
+                                  color: colors.textPrimary,
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                {item.lastMsg.replace(/[\r\n]+/g, " ")}
+                              </Text>
+                            )
+                          ) : item.lastMsgIsRead ? (
+                            <Text
+                              style={{
+                                fontSize: 14,
+                                color: colors.textPrimary,
+                              }}
+                            >
+                              {`${item.lastMsg
+                                .replace(/[\r\n]+/g, "")
+                                .substring(0, 30)}...`}
+                            </Text>
+                          ) : (
+                            <Text
+                              style={{
+                                fontSize: 14,
+                                color: colors.textPrimary,
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {`${item.lastMsg
+                                .replace(/[\r\n]+/g, "")
+                                .substring(0, 30)}...`}
+                            </Text>
+                          )}
                         </View>
                       ) : (
                         <></>
@@ -357,7 +430,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 40,
     fontSize: 16,
-    color: "#000000",
+    color: colors.textPrimary,
     paddingHorizontal: 10,
     paddingVertical: 0,
     borderRadius: 10,
