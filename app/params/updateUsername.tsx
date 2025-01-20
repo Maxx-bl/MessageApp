@@ -52,8 +52,8 @@ export default function UpdateUsername({ navigation }: { navigation: any }) {
           console.log(diffInHours);
           if (diffInHours < 2) {
             Alert.alert(
-              "Wait Period",
-              "You can only change your username once every 2 hours."
+              "Délai d'attente",
+              "Vous pouvez changer de nom d'utilisateur une fois toutes les 2 heures."
             );
             setLoading(false);
             return;
@@ -68,7 +68,7 @@ export default function UpdateUsername({ navigation }: { navigation: any }) {
       );
       const snapshot = await getDocs(q);
       if (!snapshot.empty) {
-        Alert.alert("Validation Error", "Username already taken.");
+        Alert.alert("Erreur", "Nom d'utilisateur déjà utilisé !");
         setLoading(false);
         return;
       }
@@ -83,11 +83,11 @@ export default function UpdateUsername({ navigation }: { navigation: any }) {
         await updateProfile(user, { displayName: username.toLowerCase() });
       }
 
-      Alert.alert("Success", "Your username has been updated!");
+      Alert.alert("Succès", "Nom d'utilisateur mis à jour !");
       navigation.goBack();
     } catch (error) {
       console.error("Error updating username:", error);
-      Alert.alert("Error", "Failed to update username. Please try again.");
+      Alert.alert("Erreur", "Veuillez réessayer.");
     } finally {
       setLoading(false);
     }
@@ -95,10 +95,10 @@ export default function UpdateUsername({ navigation }: { navigation: any }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Update Your Username</Text>
+      <Text style={styles.label}>Mettre à jour le nom d'utilisateur</Text>
       <TextInput
         style={styles.input}
-        placeholder="Enter new username"
+        placeholder={auth.currentUser?.displayName || "Nouveau nom d'utilisateur"}
         value={username}
         onChangeText={setUsername}
         editable={!loading}
@@ -111,7 +111,7 @@ export default function UpdateUsername({ navigation }: { navigation: any }) {
         {loading ? (
           <ActivityIndicator size="small" color="#fff" />
         ) : (
-          <Text style={styles.buttonText}>Save Username</Text>
+          <Text style={styles.buttonText}>Sauvegarder</Text>
         )}
       </TouchableOpacity>
     </View>

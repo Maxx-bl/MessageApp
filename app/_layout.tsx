@@ -48,6 +48,7 @@ function ChatStack() {
         name="Home"
         component={Home}
         options={{
+          title: "Accueil",
           headerShown: false,
           headerStyle: { backgroundColor: colors.background },
         }}
@@ -65,7 +66,7 @@ function ChatStack() {
         name="UpdateUsername"
         component={UpdateUsername}
         options={{
-          title: "Username",
+          title: "Nom d'utilisateur",
           headerStyle: { backgroundColor: colors.background },
         }}
       ></Stack.Screen>

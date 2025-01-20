@@ -184,7 +184,7 @@ export default function Contacts({ navigation }: { navigation: any }) {
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
         <Animated.Text style={styles.loadingText}>
-          Loading contacts...
+          Chargement des contacts...
         </Animated.Text>
       </View>
     );

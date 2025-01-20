@@ -50,7 +50,7 @@ export default function Signup({ navigation }: { navigation: any }) {
   const onHandleSignup = async () => {
     if (email !== "" && password !== "" && username !== "" && dateOfBirth) {
       if (password !== passwordConfirm) {
-        setErrorMsg("Passwords do not match!");
+        setErrorMsg("Les mots de passe ne correspondent pas !");
         setTimeout(() => {
           setErrorMsg("");
         }, 3000);
@@ -60,14 +60,14 @@ export default function Signup({ navigation }: { navigation: any }) {
       const MinLength = 3;
       const MaxLength = 25;
       if (username.length < MinLength) {
-        setErrorMsg(`Username must be at least ${MinLength} characters long!`);
+        setErrorMsg(`Le taille minimale du nom d'utilisateur est de ${MinLength} caractères !`);
         setTimeout(() => {
           setErrorMsg("");
         }, 3000);
         return;
       }
       if (username.length > MaxLength) {
-        setErrorMsg(`Username must be less than ${MaxLength} characters long!`);
+        setErrorMsg(`Le taille maximale du nom d'utilisateur est de ${MaxLength} caractères !`);
         setTimeout(() => {
           setErrorMsg("");
         }, 3000);
@@ -75,7 +75,7 @@ export default function Signup({ navigation }: { navigation: any }) {
       }
 
       if (!moment().subtract(18, "years").isAfter(dateOfBirth)) {
-        setErrorMsg("You must be at least 18 years old to sign up.");
+        setErrorMsg("Vous devez être majeur pour accéder à l'application !");
         setTimeout(() => setErrorMsg(""), 3000);
         return;
       }
@@ -89,7 +89,7 @@ export default function Signup({ navigation }: { navigation: any }) {
         i++;
       }
       if (!check) {
-        setErrorMsg("You can only use letters, numbers or . - _");
+        setErrorMsg("Vous pouvez utiliser uniquement les lettres, nombres et . - _");
         setTimeout(() => {
           setErrorMsg("");
         }, 5000);
@@ -103,7 +103,7 @@ export default function Signup({ navigation }: { navigation: any }) {
       );
       const snapshot = await getDocs(q);
       if (!snapshot.empty) {
-        setErrorMsg("Username already taken!");
+        setErrorMsg("Nom d'utilisateur déjà utilisé !");
         setTimeout(() => {
           setErrorMsg("");
         }, 3000);
@@ -134,7 +134,7 @@ export default function Signup({ navigation }: { navigation: any }) {
     <View style={styles.container}>
       <View style={styles.whiteSheet} />
       <SafeAreaView style={styles.form}>
-        <Text style={styles.title}>Sign Up</Text>
+        <Text style={styles.title}>Inscription</Text>
         <TextInput
           style={styles.input}
           placeholder="Email"
@@ -147,7 +147,7 @@ export default function Signup({ navigation }: { navigation: any }) {
         <View style={styles.passwordContainer}>
           <TextInput
             style={styles.passwordInput}
-            placeholder="Password"
+            placeholder="Mot de passe"
             autoCapitalize="none"
             autoCorrect={false}
             secureTextEntry={!showPassword}
@@ -180,7 +180,7 @@ export default function Signup({ navigation }: { navigation: any }) {
         </View>
         <TextInput
           style={styles.input}
-          placeholder="Confirm password"
+          placeholder="Confirmer le mot de passe"
           autoCapitalize="none"
           autoCorrect={false}
           secureTextEntry={!showPassword}
@@ -195,7 +195,7 @@ export default function Signup({ navigation }: { navigation: any }) {
           <Text style={styles.datePickerText}>
             {dateOfBirth
               ? moment(dateOfBirth).format("DD MMMM YYYY")
-              : "Date of Birth"}
+              : "Date de naissance"}
           </Text>
         </TouchableOpacity>
         {isDatePickerVisible && (
@@ -214,7 +214,7 @@ export default function Signup({ navigation }: { navigation: any }) {
         )}
         <TextInput
           style={styles.input}
-          placeholder="Username"
+          placeholder="Nom d'utilisateur"
           autoCapitalize="none"
           textContentType="username"
           value={username}
@@ -241,13 +241,13 @@ export default function Signup({ navigation }: { navigation: any }) {
           }}
         >
           <Text style={{ color: "gray", fontWeight: "600", fontSize: 14 }}>
-            Already have an account?{" "}
+          Vous avez déjà un compte ?{" "}
           </Text>
           <TouchableOpacity onPress={() => navigation.navigate("Login")}>
             <Text
               style={{ color: colors.primary, fontWeight: "600", fontSize: 14 }}
             >
-              Log In
+              Connexion
             </Text>
           </TouchableOpacity>
         </View>

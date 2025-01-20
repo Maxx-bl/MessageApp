@@ -48,7 +48,7 @@ export default function Home({ navigation }: { navigation: any }) {
             color: colors.textPrimary,
           }}
         >
-          {userDisplayName ? `@${userDisplayName}` : "Welcome!"}
+          {userDisplayName ? `@${userDisplayName}` : "Bienvenue!"}
         </Text>
         <TouchableOpacity
           style={{ marginRight: 10 }}

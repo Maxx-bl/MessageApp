@@ -19,12 +19,12 @@ export default function Settings({ navigation }: { navigation: any }) {
 
   const onSignOut = () => {
     Alert.alert(
-      "Sign Out",
-      "Are you sure you want to log out?",
+      "Déconnexion",
+      "Êtes-vous sûr de vouloir vous déconnecter ?",
       [
-        { text: "Cancel", style: "cancel" },
+        { text: "Annuler", style: "cancel" },
         {
-          text: "Sign Out",
+          text: "Confirmer",
           style: "destructive",
           onPress: () => {
             signOut(auth).catch((error) =>
@@ -66,7 +66,7 @@ export default function Settings({ navigation }: { navigation: any }) {
           onPress={() => navigation.navigate("UpdateAvatar")}
         >
           <FontAwesome name="user-circle" size={24} color={colors.primary} />
-          <Text style={styles.optionText}>Change Avatar</Text>
+          <Text style={styles.optionText}>Changer l'avatar</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -74,7 +74,7 @@ export default function Settings({ navigation }: { navigation: any }) {
           onPress={() => navigation.navigate("UpdateUsername")}
         >
           <Entypo name="edit" size={24} color={colors.primary} />
-          <Text style={styles.optionText}>Edit Username</Text>
+          <Text style={styles.optionText}>Modifier le nom d'utilisateur</Text>
         </TouchableOpacity>
       </View>
 

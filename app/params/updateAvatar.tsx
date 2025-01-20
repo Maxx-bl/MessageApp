@@ -113,7 +113,7 @@ export default function UpdateAvatar({ navigation }: { navigation: any }) {
         {loading ? (
           <ActivityIndicator size="small" color="#fff" />
         ) : (
-          <Text style={styles.buttonText}>Change Profile Picture</Text>
+          <Text style={styles.buttonText}>Changer d'avatar</Text>
         )}
       </TouchableOpacity>
     </View>
