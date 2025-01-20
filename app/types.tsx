@@ -7,4 +7,5 @@ export type RootStackParamList = {
   Settings: undefined;
   UpdateAvatar: undefined;
   UpdateUsername: undefined;
+  CreatePost: undefined;
 };
