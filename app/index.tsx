@@ -14,6 +14,7 @@ import colors from "../config/colors";
 import { signOut } from "firebase/auth";
 import { auth, db } from "../config/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Home({ navigation }: { navigation: any }) {
   const [userDisplayName, setUserDisplayName] = useState(

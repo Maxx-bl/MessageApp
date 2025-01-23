@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -19,7 +19,7 @@ export default function Login({ navigation }: { navigation: any }) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const onHandleLogin = () => {
+  const onHandleLogin = async () => {
     if (email !== "" && password !== "") {
       signInWithEmailAndPassword(auth, email, password).catch((err) =>
         Alert.alert("Login error", err.message)
