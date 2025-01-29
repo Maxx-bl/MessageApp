@@ -14,6 +14,7 @@ import Contacts from "./msg/contacts";
 import Settings from "./params/settings";
 import UpdateAvatar from "./params/updateAvatar";
 import UpdateUsername from "./params/updateUsername";
+import NewPost from "./update_content/newPost";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -84,6 +85,15 @@ function ChatStack() {
           headerStyle: { backgroundColor: colors.background },
         }}
       />
+      <Stack.Screen
+        name="newPost"
+        component={NewPost}
+        options={{
+          title: "New post",
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: colors.background },
+        }}
+      ></Stack.Screen>
     </Stack.Navigator>
   );
 }
